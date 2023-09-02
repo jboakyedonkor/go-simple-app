@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/caarlos0/env/v9"
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel"
 )
 
 type config struct {
@@ -28,6 +30,17 @@ func main() {
 	routes := Route{
 		logger: logger,
 	}
+
+	tp := newTracerProvider()
+	
+	defer func() {
+		err := tp.Shutdown(context.Background())
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
+
+	otel.SetTracerProvider(tp)
 
 	router := chi.NewRouter()
 	router.Use(routes.loggingMiddleware)
