@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/caarlos0/env/v9"
+	"github.com/caarlos0/env/v11"
 	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/otel"
 )
@@ -32,7 +32,7 @@ func main() {
 	}
 
 	tp := newTracerProvider()
-	
+
 	defer func() {
 		err := tp.Shutdown(context.Background())
 		if err != nil {
@@ -52,6 +52,7 @@ func main() {
 		Handler: router,
 	}
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Error(err.Error())
 		panic(err)
 	}
 }
